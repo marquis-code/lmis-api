@@ -13,6 +13,7 @@ import {
   AmendReportDto,
   CreateReportDto,
   ReleaseReportDto,
+  SignOutReportDto,
   UpdateReportDto,
 } from './dto/report.dto';
 import { ReportsService } from './reports.service';
@@ -79,8 +80,9 @@ export class ReportsController {
   signOut(
     @Param('id', ParseObjectIdPipe) id: string,
     @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: SignOutReportDto,
   ): Promise<ReportDetail> {
-    return this.reportsService.signOut(id, user);
+    return this.reportsService.signOut(id, user, dto.password);
   }
 
   @Post(':id/amend')

@@ -21,7 +21,7 @@ export class BlocksController {
   }
 
   @Post('gross')
-  @Roles('GROSSER', 'LAB_ADMIN', 'SUPER_ADMIN')
+  @Roles('GROSSER', 'PATHOLOGIST', 'LAB_ADMIN', 'SUPER_ADMIN')
   @ApiOperation({
     summary: 'Record gross examination and create cassettes with unique labels',
     description:

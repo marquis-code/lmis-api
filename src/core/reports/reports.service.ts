@@ -4,6 +4,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Model, Types, type ClientSession, type Connection } from 'mongoose';
@@ -22,7 +23,7 @@ import {
   type VerifyReportResult,
 } from '@lims/shared';
 import type { AuthenticatedUser } from '../../common/auth/authenticated-user';
-import { randomVerificationCode } from '../../common/utils/crypto';
+import { randomVerificationCode, verifyPassword } from '../../common/utils/crypto';
 import { runWithSystemTenant } from '../../common/context/tenant-context';
 import { withTransaction } from '../../common/utils/transaction';
 import { toReportSummary } from '../../common/serializers/entities';
@@ -219,7 +220,11 @@ export class ReportsService {
     return this.getById(reportId);
   }
 
-  async signOut(reportId: string, actor: AuthenticatedUser): Promise<ReportDetail> {
+  async signOut(reportId: string, actor: AuthenticatedUser, password: string): Promise<ReportDetail> {
+    const signer = await this.userModel.findById(actor.id).select('+passwordHash').exec();
+    if (!signer || !(await verifyPassword(password, signer.passwordHash))) {
+      throw new UnauthorizedException('Password confirmation failed. The report was not signed.');
+    }
     await withTransaction(this.connection, async (session) => {
       const report = await this.reportModel.findById(reportId).session(session).exec();
       if (!report) throw new NotFoundException('Report not found.');

@@ -66,6 +66,14 @@ export class UpdateReportDto {
   coding?: CodingDto;
 }
 
+export class SignOutReportDto {
+  @ApiProperty({ description: 'Re-enter your password to confirm your identity before signing.' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  password!: string;
+}
+
 export class ReleaseReportDto {
   @ApiPropertyOptional()
   @IsOptional()
